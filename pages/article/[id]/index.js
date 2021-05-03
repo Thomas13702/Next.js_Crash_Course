@@ -1,4 +1,5 @@
 //single article page showing when we click on link due to href being /article/[id]
+import { server } from "../../../config";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -13,6 +14,37 @@ const article = ({ article }) => {
       <Link href="/">Go Back</Link>
     </>
   );
+};
+
+export const getStaticProps = async (context) => {
+  //context can be used to get ID from URL
+  const res = await fetch(`${server}/api/articles/${context.params.id}`); //get individual post
+
+  const article = await res.json();
+
+  return {
+    props: {
+      article,
+    },
+  };
+};
+
+export const getStaticPaths = async () => {
+  const res = await fetch(`${server}/api/articles`);
+  //get all articles
+
+  const articles = await res.json();
+
+  const ids = articles.map((article) => article.id);
+  //creating an array of id for each article
+
+  const paths = ids.map((id) => ({ params: { id: id.toString() } }));
+  //maps through ids and returns then in a format like params: { id: "1", id: "2" } does this for every article this will create the paths
+
+  return {
+    paths,
+    fallback: false, //if we go to data that doesnt exist will return a 404
+  };
 };
 
 //Data fetching method next js provides to pages
@@ -35,37 +67,37 @@ const article = ({ article }) => {
 
 // Dynamically generating paths to data
 //fetched at build time
-export const getStaticProps = async (context) => {
-  //context can be used to get ID from URL
-  const res = await fetch(
-    `https://jsonplaceholder.typicode.com/posts/${context.params.id}`
-  ); //get individual post
+// export const getStaticProps = async (context) => {
+//   //context can be used to get ID from URL
+//   const res = await fetch(
+//     `https://jsonplaceholder.typicode.com/posts/${context.params.id}`
+//   ); //get individual post
 
-  const article = await res.json();
+//   const article = await res.json();
 
-  return {
-    props: {
-      article,
-    },
-  };
-};
+//   return {
+//     props: {
+//       article,
+//     },
+//   };
+// };
 
-export const getStaticPaths = async () => {
-  const res = await fetch(`https://jsonplaceholder.typicode.com/posts`);
-  //get all artciles
+// export const getStaticPaths = async () => {
+//   const res = await fetch(`https://jsonplaceholder.typicode.com/posts`);
+//   //get all artciles
 
-  const articles = await res.json();
+//   const articles = await res.json();
 
-  const ids = articles.map((article) => article.id);
-  //creating an array of id for each article
+//   const ids = articles.map((article) => article.id);
+//   //creating an array of id for each article
 
-  const paths = ids.map((id) => ({ params: { id: id.toString() } }));
-  //maps through ids and returns then in a format like params: { id: "1", id: "2" } does this for every article
+//   const paths = ids.map((id) => ({ params: { id: id.toString() } }));
+//   //maps through ids and returns then in a format like params: { id: "1", id: "2" } does this for every article
 
-  return {
-    paths,
-    fallback: false, //if we go to data that doesnt exist will return a 404
-  };
-};
+//   return {
+//     paths,
+//     fallback: false, //if we go to data that doesnt exist will return a 404
+//   };
+// };
 
 export default article;
